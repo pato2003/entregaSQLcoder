@@ -88,14 +88,33 @@ BEGIN
 END //
 DELIMITER ;
 
-call inscribir_alumno ('Patricio', 'Ferreyra', '2003-3-20');
+call inscribir_alumno ('Victoria', 'Freires', '1999-9-8');
+
 
 
 /*-----------CREACION DE TRIGGERS------------*/
 
+CREATE TABLE log_alumnos (
+  log_id int not null auto_increment primary key, 
+  legajo_alumno int NOT NULL,
+  nombre varchar(255) NOT NULL,
+  apellido varchar(255) NOT NULL,
+  fecha_nac date NOT NULL,
+  fecha datetime not null,
+  accion varchar(50) not null
+)
 
 
+DELIMITER //
+CREATE TRIGGER log_insertar_alumno
+AFTER INSERT ON alumnos
+FOR EACH ROW 
+BEGIN
+	INSERT INTO log_alumnos (legajo_alumno, nombre, apellido, fecha_nac, fecha, accion)
+    VALUES (NEW.legajo_alumno, NEW.nombre, NEW.apellido, NEW.fecha_nac, NOW(), 'INSERT');
 
+END //
+DELIMITER ;
 
 
 
