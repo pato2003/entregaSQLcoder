@@ -91,6 +91,12 @@ DELIMITER ;
 call inscribir_alumno ('Patricio', 'Ferreyra', '2003-3-20');
 
 
+/*-----------CREACION DE TRIGGERS------------*/
+
+
+
+
+
 
 
 
