@@ -22,7 +22,44 @@ CREATE OR REPLACE VIEW cant_profesores_facultad_vw AS
     
 select * from cant_profesores_facultad_vw;
     
+    
+CREATE OR REPLACE VIEW cant_alumnos_facultad_vw AS
+	(select f.nombre, f.direccion, count(*) as cant_alumnos, f.telefono
+	from profesores_facultades pyf
+	left join facultad f on (pyf.id_facultad=f.id_facultad)
+    left join profesores_alumnos pya on (pyf.legajo_profesor = pya.legajo_profesor)
+	group by f.id_facultad);
 
+select * from cant_alumnos_facultad_vw;
+
+
+CREATE OR REPLACE VIEW cant_materias_alumno_vw AS
+	(select a.legajo_alumno, a.nombre, a.apellido, count(*) as cant_materias
+	from materias_alumnos mya
+	inner join alumnos a on (a.legajo_alumno = mya.legajo_alumno)
+	group by a.legajo_alumno);
+    
+select * from cant_materias_alumno_vw;
+
+
+
+CREATE OR REPLACE VIEW cant_aulas_facultad_vw AS
+	(select f.nombre, f.direccion, count(*) as cant_aulas
+	from facultad f
+	inner join aula a on (a.id_facultad = f.id_facultad)
+	group by f.id_facultad);
+    
+select * from cant_aulas_facultad_vw;
+
+CREATE OR REPLACE VIEW info_facultades_vw AS
+	(select f.nombre, cauf.cant_aulas, calf.cant_alumnos, cpf.cant_profesores
+	from facultad f
+	left join cant_aulas_facultad_vw cauf on (f.nombre = cauf.nombre)
+    left join cant_alumnos_facultad_vw calf on (f.nombre = calf.nombre)
+    left join cant_profesores_facultad_vw cpf on (f.nombre = cpf.nombre));
+    
+select * from info_facultades_vw;
+    
 
 /*----------Creacion de Funciones-----------*/
 delimiter $$
@@ -77,6 +114,11 @@ DELIMITER ;
 
 call lista_alumnos(3);
 
+
+
+
+
+
 DELIMITER //
 create procedure inscribir_alumno (IN nom VARCHAR(255), IN apel VARCHAR(255), IN fecha DATE)
 BEGIN
@@ -104,6 +146,16 @@ CREATE TABLE log_alumnos (
   accion varchar(50) not null
 )
 
+CREATE TABLE log_profesores (
+  log_id int not null auto_increment primary key, 
+  legajo_profesor int NOT NULL,
+  nombre varchar(255) NOT NULL,
+  apellido varchar(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  fecha datetime not null,
+  accion varchar(50) not null
+)
+
 
 DELIMITER //
 CREATE TRIGGER log_insertar_alumno
@@ -115,6 +167,26 @@ BEGIN
 
 END //
 DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER log_insertar_profesor
+AFTER INSERT ON profesores
+FOR EACH ROW 
+BEGIN
+	INSERT INTO log_profesores (legajo_profesor, nombre, apellido, email, fecha, accion)
+    VALUES (NEW.legajo_profesor, NEW.nombre, NEW.apellido, NEW.email, NOW(), 'INSERT');
+
+END //
+DELIMITER ;
+
+/*PRUEBA DE LOS TRIGGERS*/
+INSERT INTO alumnos(nombre, apellido, fecha_nac) VALUES ('Martin', 'Ferraro', '1999-7-1');                
+SELECT * FROM log_alumnos;
+
+INSERT INTO profesores(nombre, apellido, email) VALUES ('Profesor', 'Prueba', 'profesor@prueba.com');                
+SELECT * FROM log_profesores;
+
 
 
 

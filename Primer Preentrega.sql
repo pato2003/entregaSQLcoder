@@ -30,7 +30,7 @@ foreign key (id_facultad) references facultad(id_facultad)
 
 create table if not exists profesores
 (
-legajo_profesor int primary key,
+legajo_profesor int auto_increment primary key,
 nombre varchar (255) not null,
 apellido varchar (255) not null,
 email varchar (255)
